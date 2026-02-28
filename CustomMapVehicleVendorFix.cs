@@ -1,10 +1,11 @@
-﻿using Facepunch;
+using Facepunch;
 using System.Linq;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Oxide.Plugins
 {
-    [Info("Custom Map Vehicle Vendor Fix", "Pinkstink", "1.0.4")]
+    [Info("Custom Map Vehicle Vendor Fix", "Pinkstink", "1.0.5")]
     [Description("Links all of the VehicleVendor NPC with the VehicleSpawner entity for custom maps")]
     public class CustomMapVehicleVendorFix : RustPlugin
     {
@@ -25,12 +26,12 @@ namespace Oxide.Plugins
                 if (vehicleVendor.GetVehicleSpawner() != null && vehicleVendor.vehicleSpawner != null)
                     continue;
 
-                var vehicleSpawners = Pool.GetList<VehicleSpawner>();
+                var vehicleSpawners = Pool.Get<List<VehicleSpawner>>();
                 Vis.Entities(vehicleVendor.transform.position, 100f, vehicleSpawners);
                 if (vehicleSpawners == null || vehicleSpawners.Count < 1)
                 {
                     PrintError($"Failed to find Vehicle Spawner for Vendor @ {vehicleVendor.transform.position}");
-                    Pool.FreeList(ref vehicleSpawners);
+                    Pool.FreeUnmanaged(ref vehicleSpawners);
                     continue;
                 }
 
@@ -47,14 +48,14 @@ namespace Oxide.Plugins
                 if (vehicleSpawner == null)
                 {
                     PrintError($"Failed to find a nearby Vehicle Spawner for Vendor @ {vehicleVendor.transform.position}");
-                    Pool.FreeList(ref vehicleSpawners);
+                    Pool.FreeUnmanaged(ref vehicleSpawners);
                     continue;
                 }
 
                 vehicleVendor.spawnerRef.Set(vehicleSpawner);
                 vehicleVendor.vehicleSpawner = vehicleSpawner;
                 Puts($"Set Vehicle Spawner for Vehicle Vendor @ {vehicleVendor.transform.position}");
-                Pool.FreeList(ref vehicleSpawners);
+                Pool.FreeUnmanaged(ref vehicleSpawners);
             }
         }
     }
